@@ -1,58 +1,85 @@
-var Pomodoro = Em.Application.create();
-
-var timer = Ember.Object.create({
-    timeLeft: "25:00",
-    totalTime: 25 * 60 * 1000,
-
-    start: function(time) {
-        var _this = this;
-        this.reset(time);
-        this._startedAt = new Date();
-        this._intervalId = setInterval(function() { _this.updateTimeLeft.apply(_this); }, 100);
+var pomodoro = {
+    started : false,
+    minutes : 0,
+    seconds : 0,
+    fillerHeight : 0,
+    fillerIncrement : 0,
+    interval : null,
+    minutesDom : null,
+    secondsDom : null,
+    fillerDom : null,
+    init : function(){
+      var self = this;
+      this.minutesDom = document.querySelector('#minutes');
+      this.secondsDom = document.querySelector('#seconds');
+      this.fillerDom = document.querySelector('#filler');
+      this.interval = setInterval(function(){
+        self.intervalCallback.apply(self);
+      }, 1000);
+      document.querySelector('#work').onclick = function(){
+        self.startWork.apply(self);
+      };
+      document.querySelector('#shortBreak').onclick = function(){
+        self.startShortBreak.apply(self);
+      };
+      document.querySelector('#longBreak').onclick = function(){
+        self.startLongBreak.apply(self);
+      };
+      document.querySelector('#stop').onclick = function(){
+        self.stopTimer.apply(self);
+      };
     },
-
-    reset: function(time) {
-        clearInterval(this._intervalId);
-        if (time) {
-            this.set('totalTime', time * 60 * 1000);
+    resetVariables : function(mins, secs, started){
+      this.minutes = mins;
+      this.seconds = secs;
+      this.started = started;
+      this.fillerIncrement = 200/(this.minutes*60);
+      this.fillerHeight = 0;  
+    },
+    startWork: function() {
+      this.resetVariables(25, 0, true);
+    },
+    startShortBreak : function(){
+      this.resetVariables(5, 0, true);
+    },
+    startLongBreak : function(){
+      this.resetVariables(15, 0, true);
+    },
+    stopTimer : function(){
+      this.resetVariables(25, 0, false);
+      this.updateDom();
+    },
+    toDoubleDigit : function(num){
+      if(num < 10) {
+        return "0" + parseInt(num, 10);
+      }
+      return num;
+    },
+    updateDom : function(){
+      this.minutesDom.innerHTML = this.toDoubleDigit(this.minutes);
+      this.secondsDom.innerHTML = this.toDoubleDigit(this.seconds);
+      this.fillerHeight = this.fillerHeight + this.fillerIncrement;
+      this.fillerDom.style.height = this.fillerHeight + 'px';
+    },
+    intervalCallback : function(){
+      if(!this.started) return false;
+      if(this.seconds == 0) {
+        if(this.minutes == 0) {
+          this.timerComplete();
+          return;
         }
-        this.set('timeLeft', this.msToString(this.get('totalTime')));
+        this.seconds = 59;
+        this.minutes--;
+      } else {
+        this.seconds--;
+      }
+      this.updateDom();
     },
-
-    updateTimeLeft: function() {
-        var now = new Date();
-        var diff = now - this._startedAt;
-        this.set('timeLeft', this.msToString(this.get('totalTime') - diff));
-    },
-
-    msToString: function(ms) {
-        var seconds = parseInt(ms / 1000, 10),
-            minutes = parseInt(seconds / 60, 10);
-
-        function pad(num) {
-            if (num < 10) return '0' + num;
-            else return num.toString();
-        }
-
-        return pad(minutes) + ':' + pad(seconds - minutes * 60);
+    timerComplete : function(){
+      this.started = false;
+      this.fillerHeight = 0;
     }
-});
-
-Ember.View.create({
-    templateName: 'timer',
-    timer: timer,
-    timeLeftBinding: 'timer.timeLeft',
-
-    pomodoro: function() {
-        this.timer.start(25);
-    },
-    shortBreak: function() {
-        this.timer.start(5);
-    },
-    longBreak: function() {
-        this.timer.start(15);
-    },
-    stop: function() {
-        this.timer.reset();
-    }
-}).appendTo('#timer');
+};
+window.onload = function(){
+  pomodoro.init();
+};
