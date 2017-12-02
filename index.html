@@ -8,27 +8,23 @@
 
 <body>
     <div id="pomodoro-app">
-  <div id="container">
-      <h1>POMODORIST</h1>
-    <div id="timer">
-      <div id="time">
-        <span id="minutes">25</span>
-        <span id="colon">:</span>
-        <span id="seconds">00</span>
-      </div>
-      <div id="filler"></div>
+        <div id="container">
+            <h1>POMODORIST</h1>
+            <div id="timer">
+                <div id="time">
+                    <span id="minutes"></span>
+                </div>
+            </div>
+            <div id="buttons">
+                <button id="work" onclick="work()">Work Time</button>
+                <button id="shortBreak" onclick="shortBreak()">Short Break</button>
+                <button id="longBreak" onclick="longBreak()">Long Break</button>
+                <button id="stop" onclick="stopTime()">&#9724;</button>
+            </div>
+        </div>
     </div>
-
-    <div id="buttons">
-      <button id="work">&#9654;</button>
-      <button id="shortBreak">Short Break</button>
-      <button id="longBreak">Long Break</button>
-      <button id="stop">&#x23f9;</button>
-    </div>
-  </div>
-</div>
+    <audio id="endSound" src="audio/Computer_Magic.wav"></audio>
     <script src="js/Pomodorist.js"></script>
-   
 </body>
 
 </html>
